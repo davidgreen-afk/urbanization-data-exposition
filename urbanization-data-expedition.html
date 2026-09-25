@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Urbanization Data Expedition</title>
+<style>
+  :root {
+    --navy: #0D2137;
+    --teal: #0B7A75;
+    --teal-light: #E4F3F1;
+    --gold: #F4A825;
+    --gold-light: #FDF1DC;
+    --gray-bg: #F4F5F7;
+    --card: #FFFFFF;
+    --text: #1B2430;
+    --text-muted: #5C6B7A;
+    --border: #E1E5EA;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--gray-bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h1, h2, h3 { font-family: Georgia, Cambria, "Times New Roman", serif; color: var(--navy); margin: 0; }
+  button { font-family: inherit; cursor: pointer; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+
+  header { background: var(--navy); color: #fff; padding: 1.8rem 1.5rem 2rem; }
+  header .inner { max-width: 900px; margin: 0 auto; }
+  header h1 { color: #fff; font-size: clamp(1.5rem, 3vw, 2.1rem); }
+  header p.tagline { margin-top: 0.4rem; color: #B9C6D4; font-size: 1rem; }
+
+  main { max-width: 900px; margin: -1rem auto 3rem; padding: 0 1.5rem; }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(13,33,55,0.06);
+    padding: 1.4rem 1.5rem;
+    margin-bottom: 1.3rem;
+  }
+  .card h2 { font-size: 1.25rem; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: flex-end; }
+  .btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--navy);
+    padding: 0.5rem 0.9rem;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .btn:hover { background: var(--gray-bg); }
+  .btn.danger:hover { border-color: #C0392B; color: #C0392B; background: #FBEAEA; }
+
+  .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.9rem; }
+  .field label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.25rem; }
+  .field input {
+    width: 100%; padding: 0.5rem 0.6rem; border: 1px solid var(--border); border-radius: 7px; font-size: 0.95rem;
+  }
+
+  .gq-label { font-size: 0.78rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.04em; }
+  .gq-text { font-family: Georgia, serif; font-size: 1.3rem; font-weight: 700; color: var(--navy); margin-top: 0.3rem; }
+  .obj-list { margin: 0.7rem 0 0; padding-left: 1.2rem; font-size: 0.94rem; }
+  .obj-list li { margin-bottom: 0.35rem; }
+
+  .stop-badge {
+    display: inline-block;
+    background: var(--teal);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.6rem;
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+  }
+  .stop-frame {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--gray-bg);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    margin: 0.8rem 0;
+  }
+  .chart-embed-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0.8rem 0;
+  }
+  .chart-caption {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+  }
+
+  .question-block { margin-top: 1.1rem; }
+  .question-text { font-size: 0.96rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+  .answer-box {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+    font-family: inherit;
+    font-size: 0.94rem;
+    resize: none;
+    overflow: hidden;
+    background: var(--teal-light);
+  }
+
+  .synthesis-box { background: var(--gold-light); }
+
+  .feedback-btn {
+    margin-top: 0.5rem;
+    background: none;
+    border: 1px solid var(--teal);
+    color: var(--teal);
+    padding: 0.4rem 0.8rem;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .feedback-btn:hover { background: var(--teal); color: #fff; }
+  .feedback-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .feedback-btn:disabled:hover { background: none; color: var(--teal); }
+
+  .scenario-card { background: linear-gradient(135deg, var(--navy), #163049); color: #fff; }
+  .scenario-card h2 { color: #fff; }
+  .scenario-label { font-size: 0.78rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.4rem; }
+  .scenario-card p { color: #D7DEE7; font-size: 0.96rem; margin: 0.5rem 0; }
+  .scenario-card p.assignment { color: #fff; font-style: italic; border-left: 3px solid var(--gold); padding-left: 0.8rem; margin-top: 0.9rem; }
+
+  .feedback-panel {
+    display: none;
+    margin-top: 0.6rem;
+    background: #F4F8F6;
+    border-left: 4px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+  .feedback-panel.open { display: block; }
+  .feedback-panel .fb-label { font-size: 0.72rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.3rem; }
+
+  .finish-card { text-align: center; }
+  .finish-card h2 { margin-bottom: 0.4rem; }
+  .finish-card p { color: var(--text-muted); font-size: 0.95rem; margin: 0 0 1rem; }
+  .finish-card .toolbar { justify-content: center; }
+
+
+  .save-indicator { font-size: 0.78rem; color: var(--text-muted); text-align: right; margin-top: 0.3rem; }
+  footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 0 1.5rem 2.5rem; }
+
+  @media print {
+    header { background: #fff !important; color: #000 !important; padding: 0 0 0.6rem; }
+    header p.tagline { color: #333 !important; }
+    .toolbar, .btn { display: none !important; }
+    body { background: #fff; }
+    main { margin: 0; max-width: 100%; }
+    .card { box-shadow: none; border: 1px solid #999; page-break-inside: avoid; }
+    .chart-embed-wrap iframe { height: 400px !important; }
+    *:focus { outline: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>Urbanization Data Expedition</h1>
+    <p class="tagline">Explore live data from Our World in Data as you work through six stops. Each chart is fully interactive &mdash; change the country, drag the time range, switch views. You need to touch the controls, not just read the picture.</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="card scenario-card">
+    <div class="scenario-label">Your Assignment</div>
+    <h2>Briefing an organization that hasn't made up its mind yet</h2>
+    <p>Around 80% of the world's population now lives in cities, towns, and suburbs. That wasn't always true &mdash; as recently as 1950, only about 20% of people lived in cities. But "urban" doesn't mean the same thing in every country, and how you define it can change the story the data seems to tell.</p>
+    <p class="assignment">Imagine you've been hired as a junior research analyst for an international development organization. Your supervisor is drafting a policy briefing on whether rising urbanization should be treated as a sign of progress worth encouraging. Before it goes out, she's asked you to explore the actual data yourself &mdash; not just skim a summary &mdash; and come back with an evidence-based answer.</p>
+  </div>
+
+  <div class="card">
+    <h2>Getting started</h2>
+    <div class="field-grid" style="margin-top:0.8rem;">
+      <div class="field"><label for="stu-name">Name</label><input type="text" id="stu-name" placeholder="Your name"></div>
+      <div class="field"><label for="stu-course">Course</label><input type="text" id="stu-course" placeholder="e.g. EVR 1001C"></div>
+      <div class="field"><label for="stu-date">Date</label><input type="date" id="stu-date"></div>
+    </div>
+
+    <div style="margin-top:1.1rem;">
+      <div class="gq-label">Guiding Question</div>
+      <div class="gq-text">To what extent does becoming more urban automatically mean a country is more developed?</div>
+    </div>
+    <ul class="obj-list">
+      <li><strong>Interpret</strong> population and density trends using interactive data visualizations.</li>
+      <li><strong>Compare</strong> urbanization patterns across regions and cities.</li>
+      <li><strong>Evaluate</strong> the relationship between urbanization and development.</li>
+    </ul>
+  </div>
+
+  <!-- STOP 1 -->
+  <div class="card">
+    <span class="stop-badge">Stop 1 of 6</span>
+    <h2>Where do people actually live?</h2>
+    <div class="stop-frame">Use the chart's country/region selector (usually a button near the top of the chart) to compare two regions of your choice &mdash; try Africa and Europe.</div>
+    <div class="chart-embed-wrap">
+      <iframe src="https://ourworldindata.org/grapher/population-of-cities-towns-and-villages?stackMode=relative" loading="lazy" style="width:100%;height:600px;border:0;" allow="web-share; clipboard-write"></iframe>
+    </div>
+    <div class="chart-caption">Chart: Our World in Data, "Population of cities, towns, and villages." CC BY.</div>
+    <div class="question-block">
+      <div class="question-text">1. For the two regions you compared, what percentage lives in cities vs. towns vs. rural areas?</div>
+      <textarea class="answer-box" data-key="q1"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q1" data-answer-key="q1" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q1">
+        <div class="fb-label">From the page</div>
+        <div>In 2020, cities held 44% of the global population, towns and suburbs 36%, and rural areas 20%. The page specifically highlights that Africa and Europe have similar regional splits despite very different income levels.</div>
+      </div>
+    </div>
+    <div class="question-block">
+      <div class="question-text">2. Before this page told you otherwise: would you have guessed richer regions have a much higher share of people in cities? What do you notice instead?</div>
+      <textarea class="answer-box" data-key="q2"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q2" data-answer-key="q2" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q2">
+        <div class="fb-label">From the page</div>
+        <div>The page states this directly: "Africa and Europe, for example, have similar shares of their populations in cities, towns, and rural areas &mdash; a fact that cuts against the common assumption that urbanization tracks closely with prosperity."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOP 2 -->
+  <div class="card">
+    <span class="stop-badge">Stop 2 of 6</span>
+    <h2>The urban takeover</h2>
+    <div class="stop-frame">Use the chart's country selector to add Nigeria. Then look at (or drag the time slider to) 1950 versus today.</div>
+    <div class="chart-embed-wrap">
+      <iframe src="https://ourworldindata.org/grapher/share-of-population-living-in-cities-towns-and-villages?time=earliest..latest" loading="lazy" style="width:100%;height:600px;border:0;" allow="web-share; clipboard-write"></iframe>
+    </div>
+    <div class="chart-caption">Chart: Our World in Data, "Share of population living in cities, towns, and villages." CC BY.</div>
+    <div class="question-block">
+      <div class="question-text">3. Roughly what share of Nigerians lived in cities in 1950? What about today?</div>
+      <textarea class="answer-box" data-key="q3"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q3" data-answer-key="q3" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q3">
+        <div class="fb-label">From the page</div>
+        <div>"In 1950, only around 1 in 10 Nigerians lived in a city. Today, it is nearly 1 in 2."</div>
+      </div>
+    </div>
+    <div class="question-block">
+      <div class="question-text">4. Nigeria is one of the fastest-urbanizing countries in the world right now. Based on the shape of the line, is that speed increasing, holding steady, or slowing down?</div>
+      <textarea class="answer-box" data-key="q4"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q4" data-answer-key="q4" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q4">
+        <div class="fb-label">From the page</div>
+        <div>The page notes that sub-Saharan Africa "has been the world's fastest-urbanizing region" in recent decades, and that "Europe and the Americas urbanized earlier, and the pace in these regions has since slowed" &mdash; a useful contrast to what you should see in Nigeria's line.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOP 3 -->
+  <div class="card">
+    <span class="stop-badge">Stop 3 of 6</span>
+    <h2>The world's biggest, fastest-growing cities</h2>
+    <div class="stop-frame">Use the chart controls to compare two cities' growth curves &mdash; try one that grew early (like Tokyo or New York) against one still growing fast today (like Jakarta or Dhaka).</div>
+    <div class="chart-embed-wrap">
+      <iframe src="https://ourworldindata.org/grapher/population-of-the-worlds-largest-cities?time=earliest..latest&country=Dhaka~Jakarta~Karachi~Cairo~New+Delhi~Lahore~Shanghai~Tokyo~Guangzhou~Manila" loading="lazy" style="width:100%;height:600px;border:0;" allow="web-share; clipboard-write"></iframe>
+    </div>
+    <div class="chart-caption">Chart: Our World in Data, "Population of the world's largest cities." CC BY.</div>
+    <div class="question-block">
+      <div class="question-text">5. Which two cities did you compare, and how do the shapes of their growth curves differ?</div>
+      <textarea class="answer-box" data-key="q5"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q5" data-answer-key="q5" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q5">
+        <div class="fb-label">From the page</div>
+        <div>"Some of the largest cities today, like Jakarta, Dhaka, New Delhi, and Karachi, are also among those that grew fastest. Other megacities like Tokyo and New York, which grew much earlier, have seen slower growth in recent decades."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOP 4 -->
+  <div class="card">
+    <span class="stop-badge">Stop 4 of 6</span>
+    <h2>Density isn't the same as population</h2>
+    <div class="stop-frame">Use the chart controls to compare Hong Kong and Karachi, or Shanghai and New Delhi.</div>
+    <div class="chart-embed-wrap">
+      <iframe src="https://ourworldindata.org/grapher/population-density-by-city?time=earliest..latest&country=Hong+Kong~Karachi" loading="lazy" style="width:100%;height:600px;border:0;" allow="web-share; clipboard-write"></iframe>
+    </div>
+    <div class="chart-caption">Chart: Our World in Data, "Population density by city." CC BY.</div>
+    <div class="question-block">
+      <div class="question-text">6. Which city is denser? Has the gap between them grown, shrunk, or stayed about the same over time?</div>
+      <textarea class="answer-box" data-key="q6"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q6" data-answer-key="q6" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q6">
+        <div class="fb-label">From the page</div>
+        <div>"Hong Kong has around 7,000 people per square kilometer, while Karachi, in Pakistan, has over 27,000." The page also notes: "Hong Kong...continued to grow in population over the last decade without becoming more crowded. Karachi and Surat, by contrast, became steadily denser."</div>
+      </div>
+    </div>
+    <div class="question-block">
+      <div class="question-text">7. A city can grow in population without becoming more crowded, or become much more crowded without growing much in population. Which pattern shows up in the cities you looked at?</div>
+      <textarea class="answer-box" data-key="q7"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q7" data-answer-key="q7" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q7">
+        <div class="fb-label">From the page</div>
+        <div>Shanghai and New Delhi are the page's own example: in the 1970s, both had around 6,500 people per km&sup2;. By 2020, both reached similar population sizes, but New Delhi became about 50% more crowded &mdash; over 14,000 per km&sup2;, compared to Shanghai's 9,500.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOP 5 -->
+  <div class="card">
+    <span class="stop-badge">Stop 5 of 6</span>
+    <h2>Life in the city isn't equal</h2>
+    <div class="stop-frame">Use the map to find one country in sub-Saharan Africa and one high-income country (try hovering over different regions).</div>
+    <div class="chart-embed-wrap">
+      <iframe src="https://ourworldindata.org/grapher/share-of-urban-population-living-in-slums?tab=map" loading="lazy" style="width:100%;height:600px;border:0;" allow="web-share; clipboard-write"></iframe>
+    </div>
+    <div class="chart-caption">Chart: Our World in Data, "Share of urban population living in slums." CC BY.</div>
+    <div class="question-block">
+      <div class="question-text">8. What percentage did you find for each of your two countries? What does a "slum household" mean, according to the page (lacking clean water, sanitation, space, or durable housing)?</div>
+      <textarea class="answer-box" data-key="q8"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q8" data-answer-key="q8" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q8">
+        <div class="fb-label">From the page</div>
+        <div>Globally, "around one in four people in urban areas live in slum households." In high-income countries the share is close to zero; across sub-Saharan Africa "more than half of urban residents live in slum households," and in Chad it's closer to 80%. A slum household lacks at least one of: clean water, sanitation, sufficient living space, or durable housing.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOP 6 -->
+  <div class="card">
+    <span class="stop-badge">Stop 6 of 6 &mdash; Capstone</span>
+    <h2>Does urbanization mean development?</h2>
+    <div class="stop-frame">Both charts below claim to show "urbanization vs. GDP." Look closely at both before answering.</div>
+    <div class="chart-embed-wrap">
+      <iframe src="https://ourworldindata.org/grapher/urbanization-vs-gdp" loading="lazy" style="width:100%;height:550px;border:0;" allow="web-share; clipboard-write"></iframe>
+    </div>
+    <div class="chart-caption">Chart A: "Urbanization vs. GDP" (national definitions). Our World in Data, CC BY.</div>
+    <div class="chart-embed-wrap">
+      <iframe src="https://ourworldindata.org/grapher/share-of-the-population-living-in-urban-areas-vs-gdp-per-capita" loading="lazy" style="width:100%;height:550px;border:0;" allow="web-share; clipboard-write"></iframe>
+    </div>
+    <div class="chart-caption">Chart B: "Share of population in urban areas vs. GDP per capita" (Degree of Urbanisation standard). Our World in Data, CC BY.</div>
+    <div class="question-block">
+      <div class="question-text">9. Both charts plot urbanization against GDP, but the relationship looks stronger in one than the other. Which one shows a stronger link? What's different about how each chart defines "urban"?</div>
+      <textarea class="answer-box" data-key="q9"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q9" data-answer-key="q9" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q9">
+        <div class="fb-label">From the page</div>
+        <div>Chart A uses "each country's own national definition of 'urban.'" Chart B uses the standardized Degree of Urbanisation framework. The page explains: "national definitions undercount urbanization in poorer countries, which strengthens the apparent link" in Chart A. Using the same standard for every country in Chart B, "this distortion goes away" and the correlation "is much weaker."</div>
+      </div>
+    </div>
+    <div class="question-block">
+      <div class="question-text">10. Final answer: To what extent does becoming more urban automatically mean a country is more developed? Use at least one specific chart from today to support your answer.</div>
+      <textarea class="answer-box synthesis-box" data-key="q10" style="min-height:100px;"></textarea>
+      <button class="feedback-btn" type="button" data-feedback-for="fb-q10" data-answer-key="q10" disabled>Check your answer against the page</button>
+      <div class="feedback-panel" id="fb-q10">
+        <div class="fb-label">From the page</div>
+        <div>The page's own answer is "to some extent, but less than you'd think, and not automatically." At the micro level, density brings real economic benefits (shared infrastructure, specialization, faster idea exchange), but the effect is "real, but modest." At the macro level, "countries that start out more urbanized do not consistently grow faster or slower than those that start out more rural." What matters more is <em>how</em> urbanization happens: driven by industrialization (much of East and Southeast Asia), it tends to bring real gains; driven by resource booms or "rural push" factors (parts of sub-Saharan Africa), it often happens "without comparable economic gains."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card finish-card">
+    <h2>You're finished &mdash; save your work</h2>
+    <p>Export a copy of your answers or print them before you close this page. Your work is auto-saved to this browser, but it won't follow you to a different device.</p>
+    <div class="toolbar">
+      <button class="btn" id="export-btn" type="button">Export answers</button>
+      <button class="btn" id="print-btn" type="button">Print / Save as PDF</button>
+      <button class="btn danger" id="reset-btn" type="button">Clear all answers</button>
+    </div>
+  </div>
+
+  <div class="save-indicator" id="save-indicator">Answers save automatically in this browser.</div>
+
+</main>
+
+<footer>
+  Urbanization Data Expedition &middot; charts courtesy of Our World in Data (CC BY) &middot; answers are stored only on this device
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var STORAGE_KEY = "urbanizationExpedition_v1";
+  var saveTimeout = null;
+
+  var textareas = Array.prototype.slice.call(document.querySelectorAll(".answer-box"));
+  var infoFields = [document.getElementById("stu-name"), document.getElementById("stu-course"), document.getElementById("stu-date")];
+
+  function autoResize(el) {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  }
+
+  function scheduleSave() {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(save, 400);
+  }
+
+  function save() {
+    var data = {
+      name: document.getElementById("stu-name").value,
+      course: document.getElementById("stu-course").value,
+      date: document.getElementById("stu-date").value,
+      answers: {}
+    };
+    textareas.forEach(function (t) { data.answers[t.dataset.key] = t.value; });
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      document.getElementById("save-indicator").textContent = "Saved to this browser at " + new Date().toLocaleTimeString();
+    } catch (e) { /* ignore */ }
+  }
+
+  function load() {
+    var raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
+    if (!raw) return;
+    try {
+      var data = JSON.parse(raw);
+      document.getElementById("stu-name").value = data.name || "";
+      document.getElementById("stu-course").value = data.course || "";
+      document.getElementById("stu-date").value = data.date || "";
+      textareas.forEach(function (t) {
+        if (data.answers && data.answers[t.dataset.key]) {
+          t.value = data.answers[t.dataset.key];
+          autoResize(t);
+        }
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  function updateFeedbackButtonState(textarea) {
+    var key = textarea.dataset.key;
+    var btn = document.querySelector('.feedback-btn[data-answer-key="' + key + '"]');
+    if (!btn) return;
+    var hasAnswer = textarea.value.trim().length > 0;
+    btn.disabled = !hasAnswer;
+    btn.title = hasAnswer ? "" : "Answer the question first";
+  }
+
+  textareas.forEach(function (t) {
+    t.addEventListener("input", function () { autoResize(t); scheduleSave(); updateFeedbackButtonState(t); });
+  });
+  infoFields.forEach(function (el) { el.addEventListener("input", scheduleSave); });
+
+  document.querySelectorAll(".feedback-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (btn.disabled) return;
+      var panel = document.getElementById(btn.dataset.feedbackFor);
+      var isOpen = panel.classList.toggle("open");
+      btn.textContent = isOpen ? "Hide feedback" : "Check your answer against the page";
+    });
+  });
+
+  // Set initial disabled state for every feedback button (covers restored answers after load() runs)
+  function refreshAllFeedbackButtons() {
+    textareas.forEach(function (t) { updateFeedbackButtonState(t); });
+  }
+
+  document.getElementById("print-btn").addEventListener("click", function () { window.print(); });
+
+  document.getElementById("export-btn").addEventListener("click", function () {
+    var lines = [];
+    lines.push("Urbanization Data Expedition \u2014 Answers");
+    var name = document.getElementById("stu-name").value;
+    var course = document.getElementById("stu-course").value;
+    var date = document.getElementById("stu-date").value;
+    if (name) lines.push("Name: " + name);
+    if (course) lines.push("Course: " + course);
+    if (date) lines.push("Date: " + date);
+    lines.push("");
+    var questionLabels = {
+      q1: "1. Regional comparison (% cities/towns/rural)",
+      q2: "2. Region vs. income guess",
+      q3: "3. Nigeria 1950 vs. today",
+      q4: "4. Nigeria's pace of change",
+      q5: "5. City growth curve comparison",
+      q6: "6. Density comparison",
+      q7: "7. Growth vs. crowding pattern",
+      q8: "8. Slum share comparison",
+      q9: "9. Why the two GDP charts differ",
+      q10: "10. Final synthesis answer"
+    };
+    textareas.forEach(function (t) {
+      lines.push(questionLabels[t.dataset.key] || t.dataset.key);
+      lines.push(t.value || "(no answer)");
+      lines.push("");
+    });
+    var blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var fname = (name || "urbanization-expedition").replace(/[^a-z0-9\-_ ]/gi, "").trim().replace(/\s+/g, "-").toLowerCase();
+    a.href = url;
+    a.download = (fname || "urbanization-expedition") + ".txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", function () {
+    if (!confirm("Clear all your answers? This can't be undone.")) return;
+    textareas.forEach(function (t) { t.value = ""; t.style.height = "auto"; });
+    document.getElementById("stu-name").value = "";
+    document.getElementById("stu-course").value = "";
+    document.getElementById("stu-date").value = "";
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  });
+
+  load();
+  refreshAllFeedbackButtons();
+})();
+</script>
+
+</body>
+</html>
